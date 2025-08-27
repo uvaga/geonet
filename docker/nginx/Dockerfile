@@ -1,0 +1,25 @@
+FROM debian:stretch
+
+# Используем архивные зеркала Debian
+RUN echo "deb http://archive.debian.org/debian/ stretch main" > /etc/apt/sources.list
+RUN echo "deb http://archive.debian.org/debian-security/ stretch/updates main" >> /etc/apt/sources.list
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    nginx \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+#RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+#RUN rm -f /etc/nginx/conf.d/default.conf
+
+#COPY nginx.conf /etc/nginx/nginx.conf
+# Копируем конфигурацию
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Проверяем синтаксис конфигурации
+RUN nginx -t
+
+EXPOSE 80
+
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]

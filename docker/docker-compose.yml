@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ../src:/var/www/html
+    depends_on:
+      - php
+
+  php:
+    build: ./php-fpm
+    volumes:
+      - ../src:/var/www/html
+    depends_on:
+      - mysql
+
+  mysql:
+    build: ./mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: geonet_db
+    ports:
+      - "32001:3306"

@@ -1,0 +1,4 @@
+./docker/mysql/data
+./src/geonet/vendor
+./src/geonet/.env
+./.idea
