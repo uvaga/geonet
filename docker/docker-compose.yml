@@ -18,9 +18,14 @@ services:
       - mysql
 
   mysql:
-    build: ./mysql
+    image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: geonet_db
+      MYSQL_DATABASE: geonet_db  # ← база создастся автоматически
+      MYSQL_USER: geonet_user       # ← пользователь создастся автоматически  
+      MYSQL_PASSWORD: geonet_password
+    command: ["mysqld", "--innodb-use-native-aio=0"]
     ports:
       - "32001:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql

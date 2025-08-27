@@ -15,17 +15,19 @@ RUN apt-get update && apt-get install -y --force-yes \
     && rm -rf /var/lib/apt/lists/*
 
 # Копируем init.sql (если он есть)
-COPY init.sql /docker-entrypoint-initdb.d/init.sql
+#COPY init.sql /docker-entrypoint-initdb.d/init.sql
+# Копируем init скрипт
+COPY init.sql /docker-entrypoint-initdb.d/
 
 RUN sed -i 's/^bind-address/#bind-address/' /etc/mysql/my.cnf
 
 # Создаём скрипт-энтрипоинт
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+#COPY docker-entrypoint.sh /usr/local/bin/
+#RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 3306
 
 VOLUME /var/lib/mysql
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+#ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["mysqld_safe"]
