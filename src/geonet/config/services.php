@@ -36,9 +36,10 @@ return [
     ],
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
-        'model_name' => env('OPENAI_MODEL_NAME'),
-        'base_uri' => env('OPENAI_BASE_URI'),
-        'temperature' => (float) env('OPENAI_TEMPERATURE')
+        'model_name' => env('OPENAI_MODEL_NAME', 'gpt-4o-mini'),
+        'base_uri' => env('OPENAI_BASE_URI', 'https://api.openai.com/v1/'),
+        'temperature' => (float) env('OPENAI_TEMPERATURE', 0.7),
+        'completion_window' => env('OPENAI_COMPLETION_WINDOW', '24h')
     ],
     'text_gen' => [
         'source_dir' => env('GEN_SOURCE_DIR'),
