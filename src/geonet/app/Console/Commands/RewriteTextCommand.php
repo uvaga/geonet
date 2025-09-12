@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use GuzzleHttp\Client;
+use App\Services\OpenAIService;
 
 class RewriteTextCommand extends Command
 {
@@ -36,7 +36,7 @@ class RewriteTextCommand extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(OpenAIService $openAI)
     {
         $file = $this->argument('file');
         $sourceDir = config('services.text_gen.source_dir');
@@ -48,32 +48,8 @@ class RewriteTextCommand extends Command
 
         $text = file_get_contents($sourceDir . $file);
 
-        $client = new Client([
-            'base_uri' => config('services.openai.base_uri'),
-            'headers' => [
-                'Authorization' => 'Bearer ' . config('services.openai.api_key'),
-                'Content-Type'  => 'application/json',
-            ],
-        ]);
-
-        $prompt = "Перепиши следующий текст на " . config('services.text_gen.rewrite_percent')
-            . "%, сохраняя его суть и частные названия:\n\n" . $text;
-
         try {
-            $response = $client->post('chat/completions', [
-                'json' => [
-                    'model'    => config('services.openai.model_name'), // можно заменить на gpt-4o или gpt-3.5-turbo
-                    'messages' => [
-                        ['role' => 'system', 'content' => 'Ты помощник, который переписывает тексты.'],
-                        ['role' => 'user', 'content' => $prompt],
-                    ],
-                    'temperature' => config('services.openai.temperature'),
-                ],
-            ]);
-
-            $data = json_decode($response->getBody(), true);
-
-            $result = $data['choices'][0]['message']['content'] ?? null;
+            $result = $openAI->rewriteText($text, config('services.text_gen.rewrite_percent'));
 
             if ($result) {
                 $outputFile = $sourceDir . 'rewritten_' . basename($file);
