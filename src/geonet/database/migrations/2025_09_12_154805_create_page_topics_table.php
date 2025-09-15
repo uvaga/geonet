@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 class CreatePageTopicsTable extends Migration
 {
+
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+    }
     /**
      * Run the migrations.
      *
@@ -25,7 +30,7 @@ class CreatePageTopicsTable extends Migration
             $table->integer('page_worktype_id')->default(0);
             $table->integer('page_subject_id')->default(0);
 
-            $table->string('page_topic_alias', 255);
+            $table->string('page_topic_alias', 191)->index('idx_topic_alias');;
             $table->longText('page_topic_content');
 
             $table->string('page_topic_title', 400);
@@ -44,9 +49,10 @@ class CreatePageTopicsTable extends Migration
             $table->integer('vuz_id')->default(0);
 
             $table->string('page_content_title', 400);
+            $table->timestamp('ai_updated_date')->default(DB::raw('CURRENT_TIMESTAMP'))->nulluble();
 
             // индексы
-            $table->index('page_topic_alias', 'idx_topic_alias');
+            //$table->index('page_topic_alias', 'idx_topic_alias');
             $table->index(['page_worktype_id', 'page_subject_id', 'site_id', 'vuz_id'], 'idx_worktype_subject_site_vuz');
         });
 
@@ -140,7 +146,7 @@ class CreatePageTopicsTable extends Migration
                 'is_published' => 1,
                 'site_id' => 1,
                 'vuz_id' => 0,
-                'page_content_title' => '﻿Лучше ли заказывать online-тест или выполнить самому?',
+                'page_content_title' => 'Лучше ли заказывать online-тест или выполнить самому?',
             ],
         ]);
     }

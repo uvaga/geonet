@@ -17,8 +17,10 @@ php-fpm:
 
 mysql:
   build: ./mysql
+  volumes:
+    - ./mysql/data:/var/lib/mysql
   environment:
     - MYSQL_ROOT_PASSWORD=root_password
     - MYSQL_DATABASE=geonet_db
   ports:
-    - "3306:3306"
+    - "32001:3306"

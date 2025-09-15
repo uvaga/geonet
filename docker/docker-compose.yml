@@ -18,7 +18,10 @@ services:
       - mysql
 
   mysql:
-    build: ./mysql
+    image: mysql:5.7
+    volumes:
+      - ./mysql/data:/var/lib/mysql:rw
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: geonet_db

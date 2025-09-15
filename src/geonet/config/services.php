@@ -43,5 +43,6 @@ return [
     'text_gen' => [
         'source_dir' => env('GEN_SOURCE_DIR'),
         'rewrite_percent' => env('GEN_REWRITE_PERCENT'),
+        'ai_rewrite_days' => env('GEN_AI_REWRITE_DAYS'),
     ]
 ];

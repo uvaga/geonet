@@ -15,4 +15,5 @@ fi
 service mysql stop
 
 # Запускаем основной процесс
-exec "$@"
+exec mysqld --user=mysql --datadir=/var/lib/mysql --console
+

@@ -28,4 +28,4 @@ EXPOSE 3306
 VOLUME /var/lib/mysql
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["mysqld_safe"]
+CMD []
