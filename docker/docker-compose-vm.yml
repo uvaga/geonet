@@ -10,17 +10,22 @@ nginx:
 
 php-fpm:
   build: ./php-fpm
+  ports:
+    - "64055:9003"   # xdebug
   volumes:
-    - /f_work_laravel_docker_src:/var/www/html  
+    - /f_work_laravel_docker_src:/var/www/html
   links:
     - mysql
 
 mysql:
-  build: ./mysql
+  image: mysql:5.7
   volumes:
-    - ./mysql/data:/var/lib/mysql
+    - /f_docker_mysql/data:/var/lib/mysql
+    - /f_docker_mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
   environment:
     - MYSQL_ROOT_PASSWORD=root_password
     - MYSQL_DATABASE=geonet_db
+    - innodb_use_native_aio=0  # ← ВАЖНО: отключаем AIO
+  command: --innodb-use-native-aio=0
   ports:
     - "32001:3306"

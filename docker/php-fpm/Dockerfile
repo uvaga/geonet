@@ -70,7 +70,8 @@ RUN echo "zend_extension=/usr/lib/php/20151012/xdebug.so" > /etc/php/7.0/mods-av
     && echo "xdebug.remote_autostart=1" >> /etc/php/7.0/mods-available/xdebug.ini \
     && echo "xdebug.remote_host=host.docker.internal" >> /etc/php/7.0/mods-available/xdebug.ini \
     && echo "xdebug.remote_port=9003" >> /etc/php/7.0/mods-available/xdebug.ini \
-    && echo "xdebug.idekey=PHPSTORM" >> /etc/php/7.0/mods-available/xdebug.ini
+    && echo "xdebug.idekey=PHPSTORM" >> /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.log=/tmp/xdebug.log" >> /etc/php/7.0/mods-available/xdebug.ini
 
 # активируем модуль
 RUN phpenmod xdebug
