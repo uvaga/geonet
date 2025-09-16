@@ -36,7 +36,8 @@ class PageTopic extends Model
 
         return $query
             ->where('ai_updated_date', '<', $cutoff)
-            ->orderBy('ai_updated_date', 'asc');           // потом даты по возрастанию
+            ->orderBy('ai_updated_date', 'asc')
+            ->limit(1);
     }
 
 }

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\PageTopic;
+use App\Models\{PageTopic, AiRewriteLog};
 use App\Services\OpenAIService;
 use Illuminate\Console\Command;
 
@@ -47,47 +47,39 @@ class RewriteTextCommand extends Command
         foreach ($pageTopics as $pageTopic) {
             $sourceFile = $sourceDir . $pageTopic->site_id . '/' . $pageTopic->id . '.txt';
             if (!file_exists($sourceFile)) {
-                $this->error("File {$sourceFile} not found");
+                $error = "File {$sourceFile} not found";
+                $this->error($error);
+                $aiRewriteLog = new AiRewriteLog(['page_topic_id' => $pageTopic->id, 'status' => $error]);
+                $aiRewriteLog->save();
                 continue;
             }
-            //TODO create table with logs (topic_id, date, result)
+
             $text = file_get_contents($sourceFile);
 
             try {
                 $result = $openAI->rewriteText($text, config('services.text_gen.rewrite_percent'));
 
-                if ($result) {
-                    $outputFile = $sourceFile . '_rewritten_';
-                    file_put_contents($outputFile, $result);
+                if ($result['text'] && strlen($result['text']) > 100 && $result['status'] === 'stop') {
+                    $outputFile = $sourceFile;
+                    file_put_contents($outputFile, $result['text']);
                     $this->info("Result saved into {$outputFile}");
+                    $status = $result['status'];
                 } else {
                     $this->error("Can't get response from API");
+                    $status = "Can't get response from API. " . $result['status'];
                 }
+                $aiRewriteLogData = ['page_topic_id' => $pageTopic->id, 'status' => $status];
 
             } catch (\Exception $e) {
-                $this->error("Bad Request: " . $e->getMessage());
+                $this->error("Error: " . $e->getMessage());
+                $aiRewriteLogData = ['page_topic_id' => $pageTopic->id, 'status' => "Error: " . $e->getMessage()];
+            } finally {
+                $aiRewriteLog = new AiRewriteLog($aiRewriteLogData);
+                $aiRewriteLog->save();
+
+                $pageTopic->ai_updated_date = now();
+                $pageTopic->save();
             }
-        }
-
-        return 1;
-
-
-
-
-
-        try {
-            $result = $openAI->rewriteText($text, config('services.text_gen.rewrite_percent'));
-
-            if ($result) {
-                $outputFile = $sourceDir . 'rewritten_' . basename($file);
-                file_put_contents($outputFile, $result);
-                $this->info("Result saved into {$outputFile}");
-            } else {
-                $this->error("Can't get response from API");
-            }
-
-        } catch (\Exception $e) {
-            $this->error("Bad Request: " . $e->getMessage());
         }
 
         return 0;

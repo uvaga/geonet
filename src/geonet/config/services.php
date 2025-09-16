@@ -35,7 +35,8 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
     'openai' => [
-        'api_key' => env('OPENAI_API_KEY'),
+        //'api_key' => env('OPENAI_API_KEY'),
+        'api_key' => env('OPENROUTE_API_KEY'),
         'model_name' => env('OPENAI_MODEL_NAME'),
         'base_uri' => env('OPENAI_BASE_URI'),
         'temperature' => (float) env('OPENAI_TEMPERATURE')

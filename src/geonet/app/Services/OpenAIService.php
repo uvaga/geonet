@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\HttpFoundation\Response;
 
 class OpenAIService
 {
@@ -19,33 +21,49 @@ class OpenAIService
         ]);
     }
 
-    public function rewriteText($text, $percent = 30)
+    public function rewriteText(string $text, $percent = 30): array
     {
         try {
             $prompt = config('prompts.rewrite');
             $prompt = str_replace(':percent', $percent, $prompt);
             $prompt.= "\n\n{$text}";
 
-            $response = $this->client->post('chat/completions', [
+            $requestBody =[
                 'json' => [
                     'model'       => config('services.openai.model_name'),
                     'messages'    => [
-                        ['role' => 'system', 'content' => 'Ты помощник, который переписывает тексты.'],
+                        ['role' => 'system', 'content' => config('prompts.system_role')],
                         ['role' => 'user', 'content' => $prompt],
                     ],
                     'temperature' => config('services.openai.temperature'),
                 ],
-            ]);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            if ($e->hasResponse()) {
-                $body = (string) $e->getResponse()->getBody();
-                dd("Request error:", $body);
+            ];
+            $response = $this->client->post('chat/completions', $requestBody);
+            if ($response->getStatusCode() === Response::HTTP_OK) {
+                $result = json_decode($response->getBody(), true);
+                if (!empty($result['error'])) {
+                    $body = null;
+                    $status = $response->getBody();
+                } else {
+                    $body = $result['choices'][0]['message']['content'] ?? null;
+                    $status = $result['choices'][0]['finish_reason'] ?? null;
+                }
             } else {
-                dd("Error without response:", $e->getMessage());
+                $body = 'Error response code: ' . $response->getStatusCode() . ' Body:' . $response->getBody();
+                $status = 'failed';
             }
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                $body = 'Request error:' . $e->getResponse()->getBody();
+            } else {
+                $body = 'Error without response:' . $e->getMessage();
+            }
+            $status = 'failed';
         }
 
-        $result = json_decode($response->getBody(), true);
-        return $result['choices'][0]['message']['content'] ?? null;
+        return [
+            'text' => $body ?? null,
+            'status' => $status ?? null,
+        ];
     }
 }

@@ -13,6 +13,9 @@ class CreateSitesTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('sites')) {
+            return;
+        }
         Schema::create('sites', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->increments('id'); // int(4) AUTO_INCREMENT PRIMARY KEY
