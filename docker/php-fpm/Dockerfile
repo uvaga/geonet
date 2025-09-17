@@ -12,7 +12,11 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     git \
-    unzip
+    mc \
+    unzip \
+    zlib1g-dev \
+    libzip-dev \
+    build-essential
 
 # Устанавливаем PHP 7.0
 RUN apt-get update && apt-get install -y \
@@ -25,9 +29,13 @@ RUN apt-get update && apt-get install -y \
     php7.0-mbstring \
     php7.0-xml \
     php7.0-zip \
+    php-pear \
+    php7.0-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# ставим Xdebug
+RUN pecl install xdebug-2.7.2
 # Устанавливаем Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN chmod +x /usr/local/bin/composer
@@ -55,6 +63,18 @@ RUN echo "access.log = /var/log/php/access.log" >> /etc/php/7.0/fpm/php-fpm.conf
 RUN echo "catch_workers_output = yes" >> /etc/php/7.0/fpm/php-fpm.conf
 # Убираем access.log чтобы избежать ошибок
 RUN echo ";access.log = /var/log/php/access.log" >> /etc/php/7.0/fpm/php-fpm.conf
+
+# создаём конфиг Xdebug в mods-available
+RUN echo "zend_extension=/usr/lib/php/20151012/xdebug.so" > /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.remote_enable=1" >> /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.remote_autostart=1" >> /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.remote_host=host.docker.internal" >> /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.remote_port=9003" >> /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.idekey=PHPSTORM" >> /etc/php/7.0/mods-available/xdebug.ini \
+    && echo "xdebug.log=/tmp/xdebug.log" >> /etc/php/7.0/mods-available/xdebug.ini
+
+# активируем модуль
+RUN phpenmod xdebug
 
 WORKDIR /var/www/html
 

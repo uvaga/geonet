@@ -34,5 +34,16 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],
-
+    'openai' => [
+        //'api_key' => env('OPENAI_API_KEY'),
+        'api_key' => env('OPENROUTE_API_KEY'),
+        'model_name' => env('OPENAI_MODEL_NAME'),
+        'base_uri' => env('OPENAI_BASE_URI'),
+        'temperature' => (float) env('OPENAI_TEMPERATURE')
+    ],
+    'text_gen' => [
+        'source_dir' => env('GEN_SOURCE_DIR'),
+        'rewrite_percent' => env('GEN_REWRITE_PERCENT'),
+        'ai_rewrite_days' => env('GEN_AI_REWRITE_DAYS'),
+    ]
 ];
