@@ -38,27 +38,26 @@ class OpenAIService
                     'temperature' => config('services.openai.temperature'),
                 ],
             ];
+            $body = null;
             $response = $this->client->post('chat/completions', $requestBody);
+
             if ($response->getStatusCode() === Response::HTTP_OK) {
                 $result = json_decode($response->getBody(), true);
                 if (!empty($result['error'])) {
-                    $body = null;
                     $status = $response->getBody();
                 } else {
                     $body = $result['choices'][0]['message']['content'] ?? null;
                     $status = $result['choices'][0]['finish_reason'] ?? null;
                 }
             } else {
-                $body = 'Error response code: ' . $response->getStatusCode() . ' Body:' . $response->getBody();
-                $status = 'failed';
+                $status = 'Error response code: ' . $response->getStatusCode() . ' Body:' . $response->getBody();
             }
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
-                $body = 'Request error:' . $e->getResponse()->getBody();
+                $status = 'Request error:' . $e->getResponse()->getBody();
             } else {
-                $body = 'Error without response:' . $e->getMessage();
+                $status = 'Error without response:' . $e->getMessage();
             }
-            $status = 'failed';
         }
 
         return [

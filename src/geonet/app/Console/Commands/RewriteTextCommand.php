@@ -51,6 +51,8 @@ class RewriteTextCommand extends Command
                 $this->error($error);
                 $aiRewriteLog = new AiRewriteLog(['page_topic_id' => $pageTopic->id, 'status' => $error]);
                 $aiRewriteLog->save();
+                $pageTopic->ai_updated_date = now();
+                $pageTopic->save();
                 continue;
             }
 
@@ -64,21 +66,20 @@ class RewriteTextCommand extends Command
                     file_put_contents($outputFile, $result['text']);
                     $this->info("Result saved into {$outputFile}");
                     $status = $result['status'];
+
+                    $pageTopic->ai_updated_date = now();
+                    $pageTopic->save();
                 } else {
                     $this->error("Can't get response from API");
                     $status = "Can't get response from API. " . $result['status'];
                 }
                 $aiRewriteLogData = ['page_topic_id' => $pageTopic->id, 'status' => $status];
-
             } catch (\Exception $e) {
                 $this->error("Error: " . $e->getMessage());
                 $aiRewriteLogData = ['page_topic_id' => $pageTopic->id, 'status' => "Error: " . $e->getMessage()];
             } finally {
                 $aiRewriteLog = new AiRewriteLog($aiRewriteLogData);
                 $aiRewriteLog->save();
-
-                $pageTopic->ai_updated_date = now();
-                $pageTopic->save();
             }
         }
 
