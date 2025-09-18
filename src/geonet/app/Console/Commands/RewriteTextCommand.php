@@ -35,9 +35,9 @@ class RewriteTextCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle(OpenAIService $openAI)
+    public function handle(): int
     {
         $sourceDir = config('services.text_gen.source_dir');
 
@@ -59,14 +59,20 @@ class RewriteTextCommand extends Command
             $text = file_get_contents($sourceFile);
 
             try {
-                $result = $openAI->rewriteText($text, config('services.text_gen.rewrite_percent'));
+                $openAI = new OpenAIService('PageTopicTextRewrite.com');
+                $result = $openAI->rewriteText($text, $pageTopic->page_content_title, config('services.text_gen.rewrite_percent'));
 
                 if ($result['text'] && strlen($result['text']) > 100 && $result['status'] === 'stop') {
+                    $parts = preg_split('/\s*={5,}\s*/', $result['text']);
+                    $contentTitle = trim(strip_tags($parts[0])) ?? $pageTopic->page_content_title;
+                    $content = $parts[1] ?? $result['text'];
+
                     $outputFile = $sourceFile;
-                    file_put_contents($outputFile, $result['text']);
+                    file_put_contents($outputFile, $content);
                     $this->info("Result saved into {$outputFile}");
                     $status = $result['status'];
 
+                    $pageTopic->page_content_title = $contentTitle;
                     $pageTopic->ai_updated_date = now();
                     $pageTopic->save();
                 } else {

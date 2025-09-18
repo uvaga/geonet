@@ -8,25 +8,28 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OpenAIService
 {
+    /** @var Client */
     protected $client;
 
-    public function __construct()
+    public function __construct(string $appName)
     {
         $this->client = new Client([
             'base_uri' => config('services.openai.base_uri'),
             'headers'  => [
                 'Authorization' => 'Bearer ' . config('services.openai.api_key'),
                 'Content-Type'  => 'application/json',
+                'X-Title'       => $appName,
+                'HTTP-Referer'  => "https://{$appName}/",
             ],
         ]);
     }
 
-    public function rewriteText(string $text, $percent = 30): array
+    public function rewriteText(string $text, string $pageContentTitle, $percent = 30): array
     {
         try {
             $prompt = config('prompts.rewrite');
-            $prompt = str_replace(':percent', $percent, $prompt);
-            $prompt.= "\n\n{$text}";
+            $prompt = str_replace([':percent', ':page_content_title'], [$percent, $pageContentTitle], $prompt);
+            $prompt.= "\n{$text}";
 
             $requestBody =[
                 'json' => [
@@ -45,6 +48,8 @@ class OpenAIService
                 $result = json_decode($response->getBody(), true);
                 if (!empty($result['error'])) {
                     $status = $response->getBody();
+                } elseif (!empty($result['choices'][0]['error']['message'])) {
+                    $status = $result['choices'][0]['error']['message'] . ' Code: ' . ($result['choices'][0]['error']['code'] ?? '');
                 } else {
                     $body = $result['choices'][0]['message']['content'] ?? null;
                     $status = $result['choices'][0]['finish_reason'] ?? null;
