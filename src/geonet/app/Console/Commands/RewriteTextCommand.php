@@ -39,12 +39,16 @@ class RewriteTextCommand extends Command
      */
     public function handle(): int
     {
+        $this->info('Starting ' . $this->signature . ' script');
         $sourceDir = config('services.text_gen.source_dir');
 
         $pageTopics = PageTopic::oldAiUpdated(config('services.text_gen.ai_rewrite_days'))->get();
 
+        $this->info('Found ' . $pageTopics->count() . ' topics');
+
         /** @var PageTopic $pageTopic */
         foreach ($pageTopics as $pageTopic) {
+            $this->info('Starting process topic ID ' . $pageTopic->id);
             $sourceFile = $sourceDir . $pageTopic->site_id . '/' . $pageTopic->id . '.txt';
             if (!file_exists($sourceFile)) {
                 $error = "File {$sourceFile} not found";
@@ -66,6 +70,11 @@ class RewriteTextCommand extends Command
                     $parts = preg_split('/\s*={5,}\s*/', $result['text']);
                     $contentTitle = trim(strip_tags($parts[0])) ?? $pageTopic->page_content_title;
                     $content = $parts[1] ?? $result['text'];
+                    $content = str_replace(
+                        ['h1>', 'h2>', 'h3>'],
+                        'h4>',
+                        $content
+                    );
 
                     $outputFile = $sourceFile;
                     file_put_contents($outputFile, $content);
