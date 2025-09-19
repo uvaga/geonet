@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\{PageTopic, AiRewriteLog};
 use App\Services\OpenAIService;
 use Illuminate\Console\Command;
+use App\Helpers\TextHelper;
 
 class RewriteTextCommand extends Command
 {
@@ -70,12 +71,7 @@ class RewriteTextCommand extends Command
                     $parts = preg_split('/\s*={5,}\s*/', $result['text']);
                     $contentTitle = trim(strip_tags($parts[0])) ?? $pageTopic->page_content_title;
                     $content = $parts[1] ?? $result['text'];
-                    $content = str_replace(
-                        ['h1>', 'h2>', 'h3>'],
-                        'h6>',
-                        $content
-                    );
-                    $content = str_replace('<ul>', '<ul class="list-marked list offset-top-10">', $content);
+                    $content = TextHelper::textRewriteConvertTags($content);
 
                     $outputFile = $sourceFile;
                     file_put_contents($outputFile, $content);
