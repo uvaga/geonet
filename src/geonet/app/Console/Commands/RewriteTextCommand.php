@@ -72,9 +72,10 @@ class RewriteTextCommand extends Command
                     $content = $parts[1] ?? $result['text'];
                     $content = str_replace(
                         ['h1>', 'h2>', 'h3>'],
-                        'h4>',
+                        'h6>',
                         $content
                     );
+                    $content = str_replace('<ul>', '<ul class="list-marked list offset-top-10">', $content);
 
                     $outputFile = $sourceFile;
                     file_put_contents($outputFile, $content);
