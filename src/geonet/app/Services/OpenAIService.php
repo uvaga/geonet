@@ -5,6 +5,8 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\HttpFoundation\Response;
+use App\Helpers\TextHelper;
+use App\Models\PageTopic;
 
 class OpenAIService
 {
@@ -24,11 +26,11 @@ class OpenAIService
         ]);
     }
 
-    public function rewriteText(string $text, string $pageContentTitle, $percent = 30): array
+    public function rewriteText(string $text, PageTopic $pageTopic, $percent = 30): array
     {
         try {
             $prompt = config('prompts.rewrite');
-            $prompt = str_replace([':percent', ':page_content_title'], [$percent, $pageContentTitle], $prompt);
+            $prompt = TextHelper::textRewriteReplacePageTopicVars($prompt, $pageTopic, $percent);            
             $prompt.= "\n{$text}";
 
             $requestBody =[

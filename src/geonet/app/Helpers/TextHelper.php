@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Models\PageTopic;
+
 class TextHelper
 {
     public static function markdownToHtml(string $text): string
@@ -33,5 +35,21 @@ class TextHelper
         $text = self::markdownToHtml($text);
 
         return $text;
+    }
+
+    public static function textRewriteReplacePageTopicVars(string $prompt, PageTopic $pageTopic, int $percent): string
+    {
+        return str_replace(
+            [
+                ':percent', ':page_content_title', ':city', ':vuz'
+            ],
+            [
+                $percent,
+                $pageTopic->page_content_title,
+                $pageTopic->getCityName(),
+                $pageTopic->getVuzShortName()
+            ],
+            $prompt
+        );
     }
 }

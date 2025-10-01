@@ -43,7 +43,7 @@ class RewriteTextCommand extends Command
         $this->info('Starting ' . $this->signature . ' script');
         $sourceDir = config('services.text_gen.source_dir');
 
-        $pageTopics = PageTopic::oldAiUpdated(config('services.text_gen.ai_rewrite_days'))->get();
+        $pageTopics = PageTopic::getOldAiUpdated(config('services.text_gen.ai_rewrite_days'))->get();
 
         $this->info('Found ' . $pageTopics->count() . ' topics');
 
@@ -65,7 +65,7 @@ class RewriteTextCommand extends Command
 
             try {
                 $openAI = new OpenAIService('PageTopicTextRewrite.com');
-                $result = $openAI->rewriteText($text, $pageTopic->page_content_title, config('services.text_gen.rewrite_percent'));
+                $result = $openAI->rewriteText($text, $pageTopic, config('services.text_gen.rewrite_percent'));
 
                 if ($result['text'] && strlen($result['text']) > 100 && $result['status'] === 'stop') {
                     $parts = preg_split('/\s*={5,}\s*/', $result['text']);
