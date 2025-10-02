@@ -37,7 +37,7 @@ class TextHelper
         return $text;
     }
 
-    public static function textRewriteReplacePageTopicVars(string $prompt, PageTopic $pageTopic, int $percent): string
+    public static function textRewriteReplacePageTopicVars(string $prompt, PageTopic $pageTopic, $percent): string
     {
         return str_replace(
             [
